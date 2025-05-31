@@ -4,6 +4,7 @@ from django.template import loader
 from django.urls import reverse
 from django.db.models import F
 from django.views import generic
+from django.utils import timezone
 
 from .models import Question, Choice
 
@@ -36,7 +37,7 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.order_by("-pub_date")[:5]
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
 
 # Example using normal Http404 instead of get_object_or_404:
 """ def detail(request, question_id):
@@ -54,6 +55,8 @@ class IndexView(generic.ListView):
 class DetailView(generic.DetailView):
     model = Question
     template_name = "polls/detail.html"
+    def get_queryset(self):
+        return Question.objects.filter(pub_date__lte=timezone.now())
 
 # example without generic views:
 """ def results(request, question_id):
@@ -63,6 +66,8 @@ class DetailView(generic.DetailView):
 class ResultsView(generic.DetailView):
     model = Question
     template_name = "polls/results.html"
+    def get_queryset(self):
+        return Question.objects.filter(pub_date__lte=timezone.now())
 
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
